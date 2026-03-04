@@ -13,14 +13,13 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // ==========================
-// CONFIGURAÇÃO POSTGRESQL
+// CONFIGURAÇÃO POSTGRESQL (NUVEM)
 // ==========================
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "circulo_cuidado",
-  password: "admin",
-  port: 5432,
+  connectionString: "COLE_O_SEU_LINK_DO_SUPABASE_AQUI",
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // ==========================
