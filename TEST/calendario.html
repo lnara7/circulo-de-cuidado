@@ -1,0 +1,271 @@
+    <!DOCTYPE html>
+    <html lang="pt-PT">
+    <head>
+        <meta charset="UTF-8">
+        <title>Calendário - Círculo de Cuidado</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+        <style>
+            :root { --coral: #F26A4B; --azul: #2EA7C9; }
+            body { font-family: 'Nunito', sans-serif; background: #f0fdf4; padding: 20px; }
+            .top-bar { max-width: 1000px; margin: 0 auto 20px auto; display: flex; justify-content: space-between; align-items: center; }
+            .calendar-wrapper { background: #fff; max-width: 1000px; margin: auto; border-radius: 16px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+            .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+            .weekday { text-align: center; font-weight: 800; color: #64748b; padding-bottom: 10px; }
+            .day { min-height: 120px; background: #f8fafc; border-radius: 12px; display: flex; flex-direction: column; padding: 8px; border: 2px solid transparent; }
+            
+            .tem-ajuda { background-color: #e0f2fe; border-color: var(--azul); }
+            .tem-preciso { background-color: #ffedeb; border-color: var(--coral); }
+            .dia-misto { background-color: #f1f5f9; border-color: #94a3b8; }
+            .weekend { background: #e2e8f0; cursor: not-allowed !important; opacity: 0.5; color: #94a3b8; }
+            .day:hover:not(.empty, .weekend) { transform: translateY(-2px); cursor: pointer; border-color: #cbd5e1; }
+            
+            .event-badge { font-size: 10px; padding: 3px 5px; border-radius: 6px; margin-top: 4px; color: white; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+            .badge-ajuda { background: var(--azul); }
+            .badge-preciso { background: var(--coral); }
+            .my-event { border: 2px solid #333; cursor: pointer; }
+            .my-event::after { content: '✕'; float: right; margin-left: 5px; }
+            
+            .btn-sair { color: var(--coral); border: 2px solid var(--coral); font-weight: 700; border-radius: 10px; background: white; }
+            .btn-sair:hover { background: var(--coral); color: white; }
+            
+            .avatar-img { width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 2px solid var(--azul); cursor: pointer; transition: 0.2s; }
+            .avatar-img:hover { opacity: 0.8; }
+        </style>
+    </head>
+    <body>
+
+    <div class="top-bar">
+        <div class="d-flex align-items-center gap-3">
+            <input type="file" id="fotoInput" accept="image/*" style="display: none;" onchange="uploadFoto(event)">
+            <label for="fotoInput" title="Alterar foto de perfil">
+                <img id="userAvatar" src="https://ui-avatars.com/api/?name=Mae&background=f8fafc&color=2EA7C9" class="avatar-img" alt="Avatar">
+            </label>
+            <h4 class="fw-bold m-0">Olá, <span id="userName">Mãe</span>!</h4>
+        </div>
+        <button class="btn btn-sair" onclick="localStorage.clear(); window.location.href='login.html'">Sair</button>
+    </div>
+
+    <div class="calendar-wrapper">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <button class="btn btn-outline-primary" id="prevMonth">←</button>
+            <h2 id="monthYear" class="fw-bold m-0 text-capitalize"></h2>
+            <button class="btn btn-outline-primary" id="nextMonth">→</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+            <div class="weekday">Dom</div><div class="weekday">Seg</div><div class="weekday">Ter</div>
+            <div class="weekday">Qua</div><div class="weekday">Qui</div><div class="weekday">Sex</div><div class="weekday">Sáb</div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dayModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="fw-bold mb-0 text-dark">Agenda do Dia <span id="modalDataTitle"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="viewMode">
+                        <div id="eventsList" class="mb-4"></div>
+                        <button class="btn w-100 fw-bold" style="border: 2px dashed var(--azul); color: var(--azul);" onclick="toggleMode('add')">
+                            + Adicionar meu horário
+                        </button>
+                    </div>
+
+                    <div id="addMode" style="display: none;">
+                        <h6 class="fw-bold mb-3">O que você deseja?</h6>
+                        <select class="form-select mb-3" id="tipo">
+                            <option value="Ajudar">Quero Ajudar</option>
+                            <option value="Preciso de Ajuda">Preciso de Ajuda</option>
+                        </select>
+                        
+                        <h6 class="fw-bold mb-3 mt-3">Qual período?</h6>
+                        <select class="form-select mb-4" id="periodo">
+                            <option value="Manhã">Manhã</option>
+                            <option value="Tarde">Tarde</option>
+                        </select>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-light w-50" onclick="toggleMode('view')">Cancelar</button>
+                            <button class="btn btn-primary w-50" style="background: var(--coral); border: none;" onclick="salvarEvento()">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDate = new Date();
+        let user = JSON.parse(localStorage.getItem('usuario'));
+        let dayModalInstance;
+        let selectedDate = ""; 
+        let eventos = [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            dayModalInstance = new bootstrap.Modal(document.getElementById('dayModal'));
+        });
+
+        if (!user) {
+            window.location.href = "login.html";
+        } else {
+            document.getElementById('userName').innerText = user.nome.split(' ')[0];
+            // Carrega a foto salva ou coloca uma padrão com a inicial do nome
+            const avatarDefault = `https://ui-avatars.com/api/?name=${user.nome}&background=f8fafc&color=2EA7C9`;
+            document.getElementById('userAvatar').src = user.foto || avatarDefault;
+        }
+
+        // Função para fazer Upload e Converter Foto para Base64
+        async function uploadFoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Foto = e.target.result;
+                document.getElementById('userAvatar').src = base64Foto;
+                
+                // Atualiza no localStorage
+                user.foto = base64Foto;
+                localStorage.setItem('usuario', JSON.stringify(user));
+
+                // Envia para o backend
+                await fetch("http://localhost:3000/avatar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: user.id, foto: base64Foto })
+                });
+            };
+            reader.readAsDataURL(file); // Lê a imagem
+        }
+
+        async function carregar() {
+            const res = await fetch("http://localhost:3000/events");
+            eventos = await res.json();
+            render();
+        }
+
+        function toggleMode(mode) {
+            if (mode === 'add') {
+                document.getElementById('viewMode').style.display = 'none';
+                document.getElementById('addMode').style.display = 'block';
+            } else {
+                document.getElementById('viewMode').style.display = 'block';
+                document.getElementById('addMode').style.display = 'none';
+            }
+        }
+
+        function render() {
+            const grid = document.getElementById('calendarGrid');
+            document.querySelectorAll('.day').forEach(d => d.remove());
+            const year = currentDate.getFullYear(); const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDay = new Date(year, month, 1).getDay();
+
+            document.getElementById('monthYear').innerText = currentDate.toLocaleString('pt-PT', { month: 'long', year: 'numeric' });
+
+            for (let i = 0; i < firstDay; i++) grid.appendChild(Object.assign(document.createElement('div'), {className: 'day empty'}));
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                const dataObjeto = new Date(year, month, i);
+                const diaSemana = dataObjeto.getDay();
+                const isWeekend = (diaSemana === 0 || diaSemana === 6);
+                
+                dayDiv.className = 'day'; 
+                dayDiv.innerHTML = `<b>${i}</b>`;
+
+                if (isWeekend) {
+                    dayDiv.classList.add('weekend');
+                } else {
+                    const diaEvs = eventos.filter(e => e.data === dateStr);
+                    
+                    if(diaEvs.length > 0) {
+                        const hasA = diaEvs.some(e => e.tipo === 'Ajudar'); 
+                        const hasP = diaEvs.some(e => e.tipo === 'Preciso de Ajuda');
+                        if(hasA && hasP) dayDiv.classList.add('dia-misto'); 
+                        else if(hasA) dayDiv.classList.add('tem-ajuda'); 
+                        else dayDiv.classList.add('tem-preciso');
+                    }
+
+                    diaEvs.forEach(e => {
+                        const b = document.createElement('div'); 
+                        const souEu = e.user_id === user?.id;
+                        b.className = `event-badge ${e.tipo === 'Ajudar' ? 'badge-ajuda' : 'badge-preciso'} ${souEu ? 'my-event' : ''}`;
+                        b.innerText = `${e.periodo[0]}: ${e.nome.split(' ')[0]}`;
+                        
+                        if(souEu) b.onclick = (ev) => { ev.stopPropagation(); apagarEvento(e.id); };
+                        dayDiv.appendChild(b);
+                    });
+
+                    dayDiv.onclick = () => { 
+                        selectedDate = dateStr; 
+                        document.getElementById('modalDataTitle').innerText = i; 
+                        
+                        const listDiv = document.getElementById('eventsList');
+                        listDiv.innerHTML = '';
+                        
+                        if (diaEvs.length === 0) {
+                            listDiv.innerHTML = '<p class="text-center text-muted my-3" style="font-size:14px;">Nenhum registo para este dia. Seja a primeira a partilhar!</p>';
+                        } else {
+                            diaEvs.forEach(e => {
+                                const isMine = e.user_id === user?.id;
+                                const bg = e.tipo === 'Ajudar' ? '#e0f2fe' : '#ffedeb';
+                                const color = e.tipo === 'Ajudar' ? 'var(--azul)' : 'var(--coral)';
+                                const avatarList = e.foto || `https://ui-avatars.com/api/?name=${e.nome}&background=fff&color=333`;
+                                
+                                listDiv.innerHTML += `
+                                    <div class="d-flex justify-content-between align-items-center p-2 mb-2 rounded shadow-sm" style="background: ${bg}; border-left: 4px solid ${color};">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="${avatarList}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;">
+                                            <div style="font-size: 14px;">
+                                                <strong class="text-dark">${e.nome}</strong> - ${e.periodo}<br>
+                                                <span style="color: ${color}; font-weight: 800; font-size: 12px;">${e.tipo.toUpperCase()}</span>
+                                            </div>
+                                        </div>
+                                        ${isMine ? `<button class="btn btn-sm btn-outline-danger" onclick="apagarEvento(${e.id})" title="Remover meu agendamento">✕</button>` : ''}
+                                    </div>
+                                `;
+                            });
+                        }
+
+                        toggleMode('view'); 
+                        dayModalInstance.show(); 
+                    };
+                }
+                grid.appendChild(dayDiv);
+            }
+        }
+
+        async function salvarEvento() {
+            const res = await fetch("http://localhost:3000/events", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: user.id, data: selectedDate, tipo: document.getElementById('tipo').value, periodo: document.getElementById('periodo').value })
+            });
+            if(res.ok) {
+                dayModalInstance.hide(); carregar();
+            } else {
+                const erro = await res.json();
+                alert(erro.erro);
+            }
+        }
+
+        async function apagarEvento(id) {
+            if(confirm("Remover este agendamento?")) {
+                await fetch(`http://localhost:3000/events/${id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: user.id }) });
+                dayModalInstance.hide(); 
+                carregar();
+            }
+        }
+
+        document.getElementById('prevMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); render(); };
+        document.getElementById('nextMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); render(); };
+        
+        carregar();
+    </script>
+    </body>
+    </html>

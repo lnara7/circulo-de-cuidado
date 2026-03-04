@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Posso Cuidar</title>
+
+<link href="./bootstrap-5.3.8-dist/bootstrap-5.3.8-dist/css/bootstrap.css" rel="stylesheet">
+
+<style>
+  body { background-color: #f4f6f9; }
+  .card-calendario {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+  footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: white;
+  }
+  #historicoDisponibilidade, #historicoPedidos {
+    margin-top: 15px;
+    background: #eef2f7;
+    padding: 15px;
+    border-radius: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+  #historicoDisponibilidade p, #historicoPedidos p {
+    margin: 5px 0;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container py-5 mb-5">
+  <div class="card-calendario mx-auto col-md-6 text-center">
+  
+    <div class="text-start mb-3">
+        <a href="./index.html" class="btn btn-outline-secondary btn-sm fw-bold" style="border-radius: 10px;">
+            ← Voltar ao Início
+        </a>
+    </div>
+
+    <h3 class="fw-bold mb-4">Escolha uma data para cuidar</h3>
+
+    <input type="date" id="dataCuidado" class="form-control mb-3">
+
+    <select id="periodo" class="form-select mb-3">
+      <option value="">Escolha o turno</option>
+      <option value="Manhã">🌅 Manhã</option>
+      <option value="Tarde">🌇 Tarde</option>
+    </select>
+
+    <button class="btn btn-primary w-100 mb-3" onclick="validarData()">
+      Confirmar Disponibilidade
+    </button>
+
+  </div>
+</div>
+
+<div class="card-calendario mx-auto col-md-6 mt-4">
+  <h4 class="fw-bold mb-3 text-center" style="color: #F26A4B;">Mães Precisando de Ajuda</h4>
+  <div id="listaPedidosAbertos" class="d-grid gap-2"></div>
+</div>
+
+
+<script>
+  const inputData = document.getElementById("dataCuidado");
+  const selectPeriodo = document.getElementById("periodo");
+
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoje.getDate()).padStart(2, '0');
+  const dataHoje = `${ano}-${mes}-${dia}`;
+  inputData.setAttribute("min", dataHoje);
+
+  async function validarData() {
+    const valor = inputData.value;
+    const periodo = selectPeriodo.value;
+
+    if (!valor) { alert("Escolha uma data."); return; }
+    if (!periodo) { alert("Escolha o turno."); return; }
+
+    const dataEscolhida = new Date(valor + "T00:00:00");
+    const diaSemana = dataEscolhida.getDay();
+    if (diaSemana === 0 || diaSemana === 6) { alert("Não é possível escolher sábado ou domingo."); return; }
+
+    const user = JSON.parse(localStorage.getItem("usuario"));
+    if (!user) { alert("Usuário não encontrado."); return; }
+
+    try {
+      const res = await fetch("http://localhost:3000/disponibilidade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: user.id, data: valor, periodo })
+      });
+
+      const resposta = await res.json();
+      if (res.ok) {
+        alert("Disponibilidade salva com sucesso 💙");
+        inputData.value = "";
+        selectPeriodo.value = "";
+      } else {
+        alert(resposta.erro || "Erro ao salvar.");
+      }
+
+    } catch (erro) {
+      alert("Erro de conexão com o servidor.");
+      console.error(erro);
+    }
+  }
+
+  async function verHistoricoDisponibilidade() {
+    const user = JSON.parse(localStorage.getItem("usuario"));
+    if (!user) return;
+
+    try {
+      const res = await fetch(`http://localhost:3000/historico-disponibilidade/${user.id}`);
+      const dados = await res.json();
+
+      const div = document.getElementById("historicoDisponibilidade");
+      div.innerHTML = "";
+
+      if (dados.length === 0) { div.innerHTML = "<p>Nenhuma data marcada para ajudar ainda.</p>"; return; }
+
+      dados.forEach(d => {
+        const p = document.createElement("p");
+        p.textContent = `${d.data} - ${d.periodo}`;
+        div.appendChild(p);
+      });
+
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao buscar histórico de disponibilidades.");
+    }
+  }
+
+  async function carregarMãesPrecisando() {
+    const user = JSON.parse(localStorage.getItem("usuario"));
+    try {
+      const res = await fetch(`http://localhost:3000/pedidos-abertos/${user.id}`);
+      const pedidos = await res.json();
+      const container = document.getElementById("listaPedidosAbertos");
+      
+      if (pedidos.length === 0) {
+        container.innerHTML = "<p class='text-center text-muted'>Nenhum pedido em aberto no momento.</p>";
+        return;
+      }
+
+      container.innerHTML = pedidos.map(p => {
+        const dataF = p.data.split('T')[0].split('-').reverse().join('/');
+        const fotoSrc = p.foto || `https://ui-avatars.com/api/?name=${p.nome}&background=f8fafc&color=F26A4B`;
+
+        return `
+          <div class="d-flex justify-content-between align-items-center p-3 border rounded" style="background: #fff5f3;">
+            <div class="d-flex align-items-center gap-3">
+              <img src="${fotoSrc}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
+              <div>
+                <strong>${p.nome}</strong><br>
+                <span style="font-size: 14px;">${dataF} - ${p.periodo}</span>
+              </div>
+            </div>
+            <button class="btn btn-sm text-white fw-bold" style="background: #2EA7C9;" 
+              onclick="aceitarPedido(${p.solicitante_id}, '${p.data.split('T')[0]}', '${p.periodo}')">
+              Aceitar
+            </button>
+          </div>
+        `;
+      }).join('');
+    } catch (e) { console.error(e); }
+  }
+
+  window.aceitarPedido = async function(destinatario_id, data, periodo) {
+    const user = JSON.parse(localStorage.getItem("usuario"));
+    try {
+      const res = await fetch("http://localhost:3000/enviar-notificacao", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remetente_id: user.id, destinatario_id, tipo: 'oferece_ajuda', data, periodo })
+      });
+      const dados = await res.json();
+      if(res.ok) alert("Aviso enviado! A mãe será notificada.");
+      else alert(dados.erro);
+    } catch (e) { alert("Erro de conexão."); }
+  }
+
+  // Chame a função quando a página carregar
+  carregarMãesPrecisando();
+</script>
+
+</body>
+</html>

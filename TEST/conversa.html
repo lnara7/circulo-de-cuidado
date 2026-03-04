@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversa - Círculo de Cuidado</title>
+<link href="./bootstrap-5.3.8-dist/bootstrap-5.3.8-dist/css/bootstrap.css" rel="stylesheet">
+<style>
+  body { background-color: #f4f6f9; font-family: 'Nunito', sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; }
+  .chat-header { background: white; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 10; }
+  .chat-box { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  
+  .msg-balao { max-width: 75%; padding: 10px 15px; border-radius: 16px; font-size: 15px; word-wrap: break-word; }
+  .msg-minha { background: #2EA7C9; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .msg-dela { background: white; border: 1px solid #e2e8f0; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; }
+  .msg-proposta { background: #fff5f3; border: 2px dashed #F26A4B; color: #333; align-self: center; font-size: 13px; font-weight: bold; text-align: center; width: 100%; max-width: 400px; }
+
+  .chat-footer { background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: center; }
+  .input-msg { border: 1px solid #cbd5e1; border-radius: 20px; padding: 10px 15px; flex-grow: 1; outline: none; }
+  .btn-round { width: 45px; height: 45px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.2s; }
+  .btn-send { background: #2EA7C9; color: white; }
+  .btn-mic { background: #f1f5f9; color: #64748b; }
+  .btn-mic.recording { background: #ef4444; color: white; animation: pulse 1.5s infinite; }
+  .btn-proposta { background: #fef4f2; color: #F26A4B; border: 1px solid #F26A4B; }
+
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  
+  audio { max-width: 200px; height: 35px; }
+</style>
+</head>
+<body>
+
+<div class="chat-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+        <a href="./chat.html" class="btn btn-outline-secondary btn-sm fw-bold border-0 fs-5">←</a>
+        <h5 class="fw-bold mb-0 text-dark" id="contatoNome">Carregando...</h5>
+    </div>
+</div>
+
+<div class="chat-box" id="chatBox"></div>
+
+<div class="chat-footer">
+    <button class="btn-round btn-proposta shadow-sm" title="Fazer proposta de agendamento" data-bs-toggle="modal" data-bs-target="#propostaModal">📅</button>
+    
+    <input type="file" id="inputImagem" accept="image/*" style="display: none;" onchange="enviarImagem(event)">
+    <button class="btn-round shadow-sm" style="background: #e2e8f0; color: #475569;" onclick="document.getElementById('inputImagem').click()" title="Enviar Imagem">📷</button>
+
+    <input type="text" id="inputTexto" class="input-msg" placeholder="Digite uma mensagem..." onkeypress="if(event.key === 'Enter') enviarTexto()">
+    <button class="btn-round btn-mic shadow-sm" id="btnMic" onclick="toggleGravacao()">🎙️</button>
+    <button class="btn-round btn-send shadow-sm" onclick="enviarTexto()">▶</button>
+</div>
+
+<div class="modal fade" id="propostaModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold text-dark">Propor Agendamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" style="font-size: 13px;">O pedido será enviado diretamente para os "Pedidos Recebidos" dela.</p>
+                <select id="tipoProposta" class="form-select mb-3">
+                    <option value="oferece_ajuda">Eu quero ajudar ela 💙</option>
+                    <option value="pede_ajuda">Preciso que ela me ajude 🧡</option>
+                </select>
+                <input type="date" id="dataProposta" class="form-control mb-3">
+                <select id="periodoProposta" class="form-select mb-4">
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                </select>
+                <button class="btn w-100 fw-bold text-white" style="background: var(--coral, #F26A4B);" onclick="enviarProposta()">Enviar Proposta</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const user = JSON.parse(localStorage.getItem("usuario"));
+  if (!user) window.location.href = "login.html";
+
+  // Pega ID e Nome da URL
+  const params = new URLSearchParams(window.location.search);
+  const contato_id = params.get("id");
+  document.getElementById("contatoNome").innerText = params.get("nome");
+
+  let chatBox = document.getElementById("chatBox");
+  let totalMensagens = 0;
+
+  // Configurações do Áudio
+  let mediaRecorder;
+  let audioChunks = [];
+  let isRecording = false;
+
+async function carregarMensagens() {
+      try {
+          const res = await fetch(`http://localhost:3000/mensagens/${user.id}/${contato_id}`);
+          const mensagens = await res.json();
+          
+          // Impede que a tela recarregue se não houver mensagem nova (ajuda o áudio a não cortar!)
+          if (mensagens.length === totalMensagens) return;
+          totalMensagens = mensagens.length;
+          
+          chatBox.innerHTML = "";
+
+          mensagens.forEach(msg => {
+              const ehMinha = msg.remetente_id === user.id;
+              
+              if (msg.tipo === 'proposta') {
+                  chatBox.innerHTML += `<div class="msg-balao msg-proposta shadow-sm my-2">${msg.conteudo}</div>`;
+              } else if (msg.tipo === 'audio') {
+                  chatBox.innerHTML += `<div class="msg-balao ${ehMinha ? 'msg-minha' : 'msg-dela'} shadow-sm d-flex align-items-center"><audio controls src="${msg.conteudo}"></audio></div>`;
+              } else if (msg.tipo === 'imagem') {
+                  // AQUI ESTÁ O PASSO 3: Lógica para mostrar a imagem na tela
+                  chatBox.innerHTML += `
+                    <div class="msg-balao ${ehMinha ? 'msg-minha' : 'msg-dela'} shadow-sm p-1">
+                      <img src="${msg.conteudo}" style="max-width: 100%; border-radius: 12px; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+                    </div>`;
+              } else {
+                  chatBox.innerHTML += `<div class="msg-balao ${ehMinha ? 'msg-minha' : 'msg-dela'} shadow-sm">${msg.conteudo}</div>`;
+              }
+          });
+          chatBox.scrollTop = chatBox.scrollHeight; // Desce pro final
+      } catch (err) { console.error(err); }
+  }
+
+  async function enviarTexto() {
+      const input = document.getElementById("inputTexto");
+      const texto = input.value.trim();
+      if (!texto) return;
+
+      input.value = "";
+      await fetch("http://localhost:3000/mensagens", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ remetente_id: user.id, destinatario_id: contato_id, conteudo: texto, tipo: 'texto' })
+      });
+      carregarMensagens();
+  }
+
+  // ==== GRAVAÇÃO DE ÁUDIO ====
+  async function toggleGravacao() {
+      const btnMic = document.getElementById("btnMic");
+
+      if (!isRecording) {
+          try {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              mediaRecorder = new MediaRecorder(stream);
+              mediaRecorder.start();
+              audioChunks = [];
+              
+              mediaRecorder.addEventListener("dataavailable", event => {
+                  audioChunks.push(event.data);
+              });
+
+              mediaRecorder.addEventListener("stop", async () => {
+                  const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                  const formData = new FormData();
+                  formData.append("audio", audioBlob, `audio_${Date.now()}.webm`);
+
+                  // Faz upload do áudio
+                  const res = await fetch("http://localhost:3000/upload-audio", { method: "POST", body: formData });
+                  const dados = await res.json();
+
+                  // Envia a URL do áudio como mensagem
+                  if (res.ok) {
+                      await fetch("http://localhost:3000/mensagens", {
+                          method: "POST", headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ remetente_id: user.id, destinatario_id: contato_id, conteudo: dados.url, tipo: 'audio' })
+                      });
+                      carregarMensagens();
+                  }
+              });
+
+              isRecording = true;
+              btnMic.classList.add("recording");
+          } catch(err) { alert("Permita o acesso ao microfone no navegador."); }
+      } else {
+          mediaRecorder.stop();
+          isRecording = false;
+          btnMic.classList.remove("recording");
+      }
+  }
+
+  // ==== ENVIAR PROPOSTA (Reaproveita o sistema de Notificações) ====
+  async function enviarProposta() {
+      const data = document.getElementById("dataProposta").value;
+      const periodo = document.getElementById("periodoProposta").value;
+      const tipo = document.getElementById("tipoProposta").value;
+
+      if(!data || !periodo) return alert("Preencha data e período!");
+
+      try {
+          // 1. Envia a notificação real para a aba de pedidos
+          const res = await fetch("http://localhost:3000/enviar-notificacao", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ remetente_id: user.id, destinatario_id: contato_id, tipo, data, periodo })
+          });
+          
+          if(res.ok) {
+              const textoExibicao = tipo === 'oferece_ajuda' 
+                ? `💙 Propus cuidar do seu filho no dia ${data.split('-').reverse().join('/')} (${periodo}). Olhe seus "Pedidos Recebidos"!`
+                : `🧡 Pedi sua ajuda para cuidar no dia ${data.split('-').reverse().join('/')} (${periodo}). Olhe seus "Pedidos Recebidos"!`;
+
+              // 2. Coloca um aviso visual no chat
+              await fetch("http://localhost:3000/mensagens", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ remetente_id: user.id, destinatario_id: contato_id, conteudo: textoExibicao, tipo: 'proposta' })
+              });
+
+              bootstrap.Modal.getInstance(document.getElementById('propostaModal')).hide();
+              carregarMensagens();
+              alert("Proposta enviada!");
+          } else {
+              const erro = await res.json();
+              alert(erro.erro);
+          }
+      } catch (e) { alert("Erro ao enviar proposta."); }
+  }
+
+  // ==== ENVIAR IMAGEM (Câmera ou Galeria) ====
+  async function enviarImagem(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("imagem", file);
+      formData.append("user_id", user.id); // Ajuda o servidor a dar nome ao arquivo
+
+      try {
+          // 1. Envia a imagem para a pasta uploads/ do servidor
+          const res = await fetch("http://localhost:3000/upload-imagem", {
+              method: "POST",
+              body: formData
+          });
+          const dados = await res.json();
+
+          if (res.ok) {
+              // 2. Grava a mensagem no banco de dados com o link da imagem
+              await fetch("http://localhost:3000/mensagens", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ 
+                      remetente_id: user.id, 
+                      destinatario_id: contato_id, 
+                      conteudo: dados.url, 
+                      tipo: 'imagem' 
+                  })
+              });
+              
+              totalMensagens = 0; // Zera a contagem para forçar a tela a atualizar na hora
+              carregarMensagens();
+          } else {
+              alert(dados.erro || "Erro ao salvar imagem no servidor.");
+          }
+      } catch (err) { 
+          alert("Erro de conexão ao tentar enviar a foto."); 
+      }
+      
+      // Limpa o input para permitir enviar a mesma foto novamente se quiser
+      event.target.value = "";
+  }
+
+  // Atualiza as mensagens a cada 3 segundos (para parecer em tempo real)
+  setInterval(carregarMensagens, 3000);
+  carregarMensagens();
+</script>
+</body>
+</html>

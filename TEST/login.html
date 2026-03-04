@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Círculo de Cuidado</title>
+    <link href="./bootstrap-5.3.8-dist/bootstrap-5.3.8-dist/css/bootstrap.css" rel="stylesheet">
+    <style>
+        :root { --coral: #F26A4B; --azul: #2EA7C9; }
+        body { background: #f0fdf4; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; }
+        .card { border: none; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 30px; width: 380px; }
+        .btn-primary { background: var(--coral); border: none; padding: 10px; border-radius: 12px; }
+        .header-section { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px; }
+        .logo { height: 120px; width: auto; margin-bottom: 10px; }
+        .site-title { color: #0f172a; font-size: 24px; font-weight: 800; }
+        .input-group-text { background: #f8fafc; cursor: pointer; border-left: none; }
+        .form-control:focus { box-shadow: none; border-color: var(--azul); }
+        .input-emoji { background: transparent; border-right: none; }
+        .form-control-emoji { border-left: none; padding-left: 0; background: #fff; }
+    </style>
+</head>
+<body>
+    <div class="card shadow">
+        <form id="loginForm">
+            <div class="header-section">
+                <img src="./logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+                <h2 class="site-title">Círculo de Cuidado</h2>
+                <p style="color: #47778f; font-size: 14px;">Conectando mães para o cuidado colaborativo</p>
+            </div>          
+            
+            <div class="input-group mb-3">
+                <span class="input-group-text input-emoji">📄</span>
+                <input type="text" id="cpfLogin" class="form-control form-control-emoji" placeholder="Digite seu CPF" required maxlength="14" oninput="mascaraCPF(this)">
+            </div>
+            
+            <div class="input-group mb-2">
+                <span class="input-group-text input-emoji">🔒</span>
+                <input type="password" id="senha" class="form-control form-control-emoji" placeholder="Senha" required>
+                <span class="input-group-text" id="toggleSenha">👁</span>
+            </div>
+            
+            <div class="text-end mb-3">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#esqueceuSenhaModal" style="color: #64748b; font-size: 13px; text-decoration: none;">Esqueceu a senha?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-bold">Entrar</button>
+            <div class="text-center mt-3">
+                <a href="register.html" style="color: var(--azul); font-weight: 700; text-decoration: none;">Não tem uma conta? Cadastre-se</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal fade" id="esqueceuSenhaModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="fw-bold text-dark">Recuperar Senha</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size: 14px; color: #64748b;">Confirme seu CPF e Data de Nascimento para redefinir sua senha.</p>
+                    <form id="resetForm">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text input-emoji">📄</span>
+                            <input type="text" id="resetCpf" class="form-control form-control-emoji" placeholder="Seu CPF" required maxlength="14" oninput="mascaraCPF(this)">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text input-emoji">🎂</span>
+                            <input type="date" id="resetDataNasc" class="form-control form-control-emoji" required title="Data de Nascimento">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text input-emoji">🔑</span>
+                            <input type="password" id="novaSenha" class="form-control form-control-emoji" placeholder="Nova Senha" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold" style="background: var(--azul);">Atualizar Senha</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function mascaraCPF(i) {
+            let v = i.value.replace(/\D/g, "");
+            v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            i.value = v;
+        }
+
+        document.getElementById("toggleSenha").onclick = function() {
+            const s = document.getElementById("senha");
+            s.type = s.type === "password" ? "text" : "password";
+            this.textContent = s.type === "password" ? "👁" : "🙈";
+        };
+
+        // Submit Login
+        document.getElementById("loginForm").onsubmit = async (e) => {
+            e.preventDefault();
+            const cpfLimpo = document.getElementById("cpfLogin").value.replace(/\D/g, "");
+
+            const res = await fetch("http://localhost:3000/login", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cpf: cpfLimpo, senha: document.getElementById("senha").value })
+            });
+            const d = await res.json();
+            if(res.ok) { 
+                localStorage.setItem("usuario", JSON.stringify(d.usuario)); 
+                window.location.href = "index.html"; 
+            } else {
+                alert(d.erro);
+            }
+        };
+
+        // Submit Redefinir Senha
+        document.getElementById("resetForm").onsubmit = async (e) => {
+            e.preventDefault();
+            const cpfLimpo = document.getElementById("resetCpf").value.replace(/\D/g, "");
+
+            const res = await fetch("http://localhost:3000/reset-password", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    cpf: cpfLimpo, 
+                    data_nascimento: document.getElementById("resetDataNasc").value,
+                    novaSenha: document.getElementById("novaSenha").value 
+                })
+            });
+            if(res.ok) {
+                alert("Senha atualizada com sucesso!");
+                bootstrap.Modal.getInstance(document.getElementById('esqueceuSenhaModal')).hide();
+                document.getElementById("resetForm").reset();
+            } else {
+                const d = await res.json();
+                alert(d.erro || "Erro ao atualizar senha.");
+            }
+        };
+    </script>
+</body>
+</html>

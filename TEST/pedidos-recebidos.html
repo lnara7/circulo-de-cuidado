@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos Recebidos</title>
+<link href="./bootstrap-5.3.8-dist/bootstrap-5.3.8-dist/css/bootstrap.css" rel="stylesheet">
+<style>
+  body { background-color: #f4f6f9; }
+  .card-notificacao { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 5px solid; }
+  .borda-azul { border-left-color: #2EA7C9; } /* Ofereceram ajuda */
+  .borda-coral { border-left-color: #F26A4B; } /* Pediram ajuda */
+</style>
+</head>
+<body>
+
+<div class="container py-5 mb-5">
+
+    <div class="text-start mb-3">
+        <a href="./index.html" class="btn btn-outline-secondary btn-sm fw-bold" style="border-radius: 10px;">
+            ← Voltar ao Início
+        </a>
+    </div>
+
+  <h3 class="fw-bold mb-4 text-center" style="color: #2EA7C9;">Novos Pedidos 🔔</h3>
+  
+  <div id="listaNotificacoes" class="mx-auto col-md-8">
+  </div>
+</div>
+
+<script>
+  const user = JSON.parse(localStorage.getItem("usuario"));
+  if (!user) window.location.href = "login.html";
+
+  async function carregarNotificacoes() {
+    try {
+      const res = await fetch(`http://localhost:3000/notificacoes/${user.id}`);
+      const notificacoes = await res.json();
+      const container = document.getElementById("listaNotificacoes");
+      container.innerHTML = "";
+
+      if (notificacoes.length === 0) {
+        container.innerHTML = "<p class='text-center text-muted'>Nenhum pedido recebido no momento.</p>";
+        return;
+      }
+
+      notificacoes.forEach(n => {
+        const dataFormatada = n.data.split('T')[0].split('-').reverse().join('/');
+        const isOferecendoAjuda = n.tipo === 'oferece_ajuda';
+        const fotoSrc = n.remetente_foto || `https://ui-avatars.com/api/?name=${n.remetente_nome}&background=f8fafc`;
+
+        let titulo = isOferecendoAjuda ? "💙 Quer te ajudar!" : "🧡 Precisa da sua ajuda!";
+        let texto = isOferecendoAjuda 
+          ? `<strong>${n.remetente_nome}</strong> se ofereceu para cuidar no dia <strong>${dataFormatada}</strong> (${n.periodo}).`
+          : `<strong>${n.remetente_nome}</strong> viu sua disponibilidade e pediu ajuda para o dia <strong>${dataFormatada}</strong> (${n.periodo}).`;
+
+        container.innerHTML += `
+          <div class="card-notificacao d-flex flex-column gap-2 ${isOferecendoAjuda ? 'borda-azul' : 'borda-coral'}">
+            <div class="d-flex align-items-center gap-3">
+              <img src="${fotoSrc}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+              <div>
+                <p class="mb-1" style="font-size: 12px; font-weight: 800; color: ${isOferecendoAjuda ? '#2EA7C9' : '#F26A4B'};">${titulo}</p>
+                <p class="mb-0 text-dark" style="font-size: 14px;">${texto}</p>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-2">
+                <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="responderPedido(${n.id}, 'recusado')">Recusar</button>
+                <button class="btn btn-sm text-white fw-bold" style="background: ${isOferecendoAjuda ? '#2EA7C9' : '#F26A4B'};" onclick="responderPedido(${n.id}, 'aceito')">Aceitar</button>
+            </div>
+          </div>
+        `;
+      });
+    } catch (err) {
+      console.error(err);
+      document.getElementById("listaNotificacoes").innerHTML = "<p class='text-center text-danger'>Erro ao carregar os pedidos.</p>";
+    }
+  }
+
+  // Função para aceitar ou recusar
+  window.responderPedido = async function(notificacao_id, resposta) {
+      if (!confirm(`Deseja realmente ${resposta === 'aceito' ? 'aceitar' : 'recusar'} este pedido?`)) return;
+      
+      try {
+          const res = await fetch("http://localhost:3000/responder-notificacao", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ notificacao_id, resposta })
+          });
+          
+          if (res.ok) {
+              alert(`Pedido ${resposta} com sucesso!`);
+              carregarNotificacoes(); // Recarrega a lista para sumir o card
+          } else {
+              alert("Erro ao responder o pedido.");
+          }
+      } catch (err) {
+          alert("Erro de conexão com o servidor.");
+      }
+  }
+
+  carregarNotificacoes();
+</script>
+</body>
+</html>

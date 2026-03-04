@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil - Círculo de Cuidado</title>
+
+  <link href="./bootstrap-5.3.8-dist/bootstrap-5.3.8-dist/css/bootstrap.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root { --coral: #F26A4B; --azul: #2EA7C9; }
+    
+    .titulo { font-size: clamp(18px, 3vw, 40px); }
+    .titulo_2 { font-size: clamp(9px, 3vw, 25px); }
+    .titulo_3 { font-size: clamp(6px, 3vw, 20px); }
+
+    .icone { width: clamp(40px, 8vw, 80px); min-width: 40px; height: auto; }
+    .icone_2 { width: 60%; height: 60%; }
+
+    .number_1 { width: clamp(4px, 3vw, 28px); min-width: 4px; height: auto; }
+
+    .avatar-img { 
+        width: 120px; height: 120px; object-fit: cover; border-radius: 50%; 
+        border: 4px solid var(--azul); cursor: pointer; transition: 0.2s; 
+    }
+    .avatar-img:hover { opacity: 0.8; }
+    
+    .btn-sair { color: var(--coral); border: 2px solid var(--coral); font-weight: 700; border-radius: 10px; background: white; padding: 5px 20px; }
+    .btn-sair:hover { background: var(--coral); color: white; }
+    
+    .btn-edit-name { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 50%; padding: 4px 10px; font-size: 14px; transition: 0.2s; }
+    .btn-edit-name:hover { background: #e2e8f0; }
+
+    /* CSS para os Cards de Estatísticas no topo */
+    .stats-card { background: white; border: 2px solid #e2e8f0; border-radius: 16px; min-width: 120px; text-align: center; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .stats-number { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 5px; }
+    .stats-label { font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+  </style>
+</head>
+
+<body>
+  <div class="section py-5 px-5" style="background-color: #e9e3e3; min-height: 80vh;">
+    <div class="row h-100">
+      <!-- Coluna Como Funciona -->
+      <div class="col-md-12 col-lg-6 border border-secondary border-3 rounded-3 mb-4 mb-lg-0" style="background-color: #f9f9f9;">
+        <p class="titulo fw-bold mb-0 pt-3">Como Funciona?</p>
+        <div class="container pb-3">
+            <!-- Card 1 -->
+            <div class="section border-3 rounded-3 p-2 m-2" style="background-color: #e9e3e3;">
+              <div class="row align-items-center">
+                <div class="col-2">
+                    <img src="./icons/calendar.png" class="icone img-fluid" alt="Calendar Icon">
+                </div>
+                <div class="col-10">
+                    <p class="titulo_2 fw-bold mb-0">
+                        <img src="./icons/1-circle-fill.png" class="number_1 img-fluid" alt="Number 1">
+                        Diga quando pode cuidar.
+                    </p>
+                    <p class="titulo_3 mb-0">Escolha os dias.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="section border-3 rounded-3 p-2 m-2" style="background-color: #e9e3e3;">
+              <div class="row align-items-center">
+                <div class="col-2">
+                    <img src="./icons/search.png" class="icone img-fluid" alt="Search Icon">
+                </div>
+                <div class="col-10">
+                    <p class="titulo_2 fw-bold mb-0">
+                        <img src="./icons/2-circle-fill.png" class="number_1 img-fluid" alt="Number 2">
+                        Encontre outra mãe.
+                    </p>
+                    <p class="titulo_3 mb-0">Veja quem pode te ajudar.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="section border-3 rounded-3 p-2 m-2" style="background-color: #e9e3e3;">
+              <div class="row align-items-center">
+                <div class="col-2">
+                    <img src="./icons/star.png" class="icone img-fluid" alt="Star Icon">
+                </div>
+                <div class="col-10">
+                    <p class="titulo_2 fw-bold mb-0">
+                        <img src="./icons/3-circle-fill.png" class="number_1 img-fluid" alt="Number 3">
+                        Ganhe horas.
+                    </p>
+                    <p class="titulo_3 mb-0">Cuide e acumule.</p>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Coluna Perfil -->
+      <div class="col-md-12 col-lg-6 border border-secondary border-3 rounded-3" style="background-color: #f9f9f9;">
+        <p class="titulo_3 fw-bold mb-0 pt-3">
+          <img src="./icons/Profile.png" class="icone img-fluid" alt="Profile Icon">
+          Meu Perfil
+        </p>
+        
+        <div class="d-flex flex-column align-items-center justify-content-center py-4">
+            <!-- Input Foto -->
+            <input type="file" id="fotoInput" accept="image/*" style="display: none;" onchange="uploadFoto(event)">
+            <label for="fotoInput" title="Alterar foto de perfil">
+                <img id="userAvatar" src="https://ui-avatars.com/api/?name=Mae&background=f8fafc&color=2EA7C9" class="avatar-img shadow" alt="Avatar">
+            </label>
+            
+            <!-- Nome -->
+            <h3 class="fw-bold mt-3 mb-1 d-flex align-items-center gap-2">
+                <span id="userName">Usuária</span>
+                <button class="btn-edit-name" title="Editar Nome">✏️</button>
+            </h3>
+
+            <p class="text-muted mb-4" style="font-size: 14px;">Mãe no Círculo de Cuidado</p>
+
+            <div class="d-flex gap-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-number" style="color: var(--azul);" id="userHoras">0</div>
+                    <div class="stats-label">Horas</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-number" style="color: var(--coral);" id="userCuidados">0</div>
+                    <div class="stats-label">Cuidados</div>
+                </div>
+            </div>
+
+            <button class="btn btn-sair" onclick="localStorage.clear(); window.location.href='login.html'">Sair da Conta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Cards inferiores -->
+ <div class="container px-4 py-5" id="custom-cards">
+    <div class="row row-cols-1 row-cols-lg-2 align-items-start g-4 py-5">
+      <div class="col text-center">
+        <a href="./posso-cuidar.html" style="text-decoration: none; color: inherit;">
+          <img src="./icons/calendar_3.png" class="img-fluid icone_2" alt="Calendário Icon">
+          <p class="titulo_3 fw-bold mb-0 mt-2">Posso cuidar.</p>
+        </a>
+      </div>
+      <div class="col text-center">
+        <a href="./preciso-ajuda.html" style="text-decoration: none; color: inherit;">
+          <img src="./icons/hearts.png" class="img-fluid icone_2" alt="Corações">
+          <p class="titulo_3 fw-bold mb-0 mt-2">Preciso de ajuda.</p>
+        </a>
+      </div>
+      <div class="col text-center">
+        <a href="./pedidos-recebidos.html" style="text-decoration: none; color: inherit;">
+          <div class="position-relative d-inline-block">
+              <img src="./icons/bell.png" class="img-fluid icone_2" alt="Pedidos Recebidos">
+              <span id="badgeNotificacoes" class="position-absolute top-0 start-1000  translate-middle badge rounded-pill bg-danger d-none" style="font-size: 4rem; padding: 10px 10px; border: 2px solid white;">
+                0
+              </span>
+          </div>
+          <p class="titulo_3 fw-bold mb-0 mt-2">Pedidos Recebidos.</p>
+        </a>
+      </div>
+      <div class="col text-center" style="cursor: pointer;" onclick="abrirModalCuidados()">
+        <img src="./icons/check.png" class="img-fluid icone_2" alt="Recebeu o cuidado">
+        <p class="titulo_3 fw-bold mb-0 mt-2">Recebeu o cuidado?</p>
+      </div>
+      <div class="col text-center">
+        <img src="./icons/clock.png" class="img-fluid icone_2" alt="Seus créditos">
+        <p class="titulo_3 fw-bold mb-0 mt-2">Seus créditos.</p>
+        <h3 class="fw-bold mt-1" style="color: var(--azul);"><span id="cardHorasNumber">0</span> horas</h3>
+      </div>
+      <div class="col text-center">
+        <a href="./chat.html" style="text-decoration: none; color: inherit;">
+          <div class="position-relative d-inline-block">
+            <img src="./icons/chat_2.png" class="img-fluid icone_2" alt="Chat">
+            <span id="badgeChat"
+              class="position-absolute top-0 start-75 translate-middle badge rounded-pill bg-danger d-none"
+              style="font-size: 4rem; padding: 10px 10px; border: 2px solid white;">
+              0
+            </span>
+          </div>
+          <p class="titulo_3 fw-bold mb-0 mt-2">Chat</p>
+        </a>
+      </div>
+
+
+      <div class="col text-center">
+        <a href="./buscar-maes.html" style="text-decoration: none; color: inherit;">
+          <img src="./icons/mom_3.png" class="img-fluid icone_2" alt="Buscar mães">
+          <p class="titulo_3 fw-bold mb-0 mt-2">Buscar mães</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="container">
+    <footer class="py-3 my-4">
+      <ul class="nav justify-content-evenly border-bottom pb-3 mb-3 w-100">
+        <li class="nav-item text-center">
+          <a href="#" class="nav-link text-body-secondary">
+            <img src="./icons/house.svg" alt="Home Icon" style="width:2rem; height:2rem;">
+            <p class="mb-0">Início</p>
+          </a>
+        </li>
+        <li class="nav-item text-center">
+          <a href="./buscar-maes.html" class="nav-link text-body-secondary">
+            <img src="./icons/people.svg" alt="People Icon" style="width:2rem; height:2rem;">
+            <p class="mb-0">Mães</p>
+          </a>
+        </li>
+        <li class="nav-item text-center">
+          <a href="./agenda.html" class="nav-link text-body-secondary">
+            <img src="./icons/calendar.svg" alt="Calendar Icon" style="width:2rem; height:2rem;">
+            <p class="mb-0">Agenda</p>
+          </a>
+        </li>
+        <li class="nav-item text-center">
+          <a href="./chat.html" class="nav-link text-body-secondary">
+            <img src="./icons/chat.svg" alt="Chat Icon" style="width:2rem; height:2rem;">
+            <p class="mb-0">Chat</p>
+          </a>
+        </li>
+        <li class="nav-item text-center">
+          <a href="#" class="nav-link text-body-secondary">
+            <img src="./icons/person.svg" alt="User Icon" style="width:2rem; height:2rem;">
+            <p class="mb-0">Perfil</p>
+          </a>
+        </li>
+      </ul>
+    </footer>
+  </div>
+
+  <!-- Modal de Nome -->
+  <div class="modal fade" id="editarNomeModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+              <div class="modal-header border-0 pb-0">
+                  <h5 class="fw-bold text-dark">Alterar Nome</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                  <div class="input-group mb-3">
+                      <span class="input-group-text border-0" style="background: transparent;">👤</span>
+                      <input type="text" id="novoNomeInput" class="form-control" style="border-left: none;" placeholder="Digite seu novo nome">
+                  </div>
+                  <button class="btn w-100 fw-bold text-white" style="background: var(--azul);" id="salvarNomeBtn">Salvar Alteração</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="modal fade" id="modalCuidados" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold text-dark">Confirmar Cuidado Recebido</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted" style="font-size: 14px;">Confirme os cuidados que você já recebeu para liberar as horas da mãe que te ajudou!</p>
+          <div id="listaCuidadosPendentes"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let user = JSON.parse(localStorage.getItem('usuario'));
+    let modalNomeInstance;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        // Puxa as notificações pendentes para colocar no Badge
+        async function carregarBadgeNotificacoes() {
+            try {
+                const res = await fetch(`http://localhost:3000/notificacoes/${user.id}`);
+                const notificacoes = await res.json();
+                const badge = document.getElementById('badgeNotificacoes');
+                if (notificacoes.length > 0) {
+                    badge.innerText = notificacoes.length;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
+                }
+            } catch (err) {
+                console.error("Erro ao carregar notificações", err);
+            }
+        }
+        carregarBadgeNotificacoes();
+
+        // Inicializa modal
+        modalNomeInstance = new bootstrap.Modal(document.getElementById('editarNomeModal'));
+
+        // Popula dados do perfil
+        document.getElementById('userName').innerText = user.nome;
+        document.getElementById('userHoras').innerText = user.horas || 0;
+        document.getElementById('userCuidados').innerText = user.cuidados || 0;
+        document.getElementById('cardHorasNumber').innerText = user.horas || 0;
+
+        // Busca os dados mais recentes do banco de dados e atualiza a tela
+        async function carregarEstatisticasFrescas() {
+            try {
+                const res = await fetch(`http://localhost:3000/usuario/${user.id}`);
+                if (res.ok) {
+                    const dados = await res.json();
+                    
+                    // Atualiza a tela com os valores reais do banco
+                    document.getElementById('userHoras').innerText = dados.horas;
+                    document.getElementById('userCuidados').innerText = dados.cuidados;
+                    document.getElementById('cardHorasNumber').innerText = dados.horas;
+                    
+                    // Atualiza a memória do navegador para não ficar defasada
+                    user.horas = dados.horas;
+                    user.cuidados = dados.cuidados;
+                    localStorage.setItem('usuario', JSON.stringify(user));
+                }
+            } catch (err) {
+                console.error("Erro ao atualizar estatísticas do banco de dados", err);
+            }
+        }
+
+        carregarEstatisticasFrescas(); // Executa a função na hora que a página carrega
+
+        const avatarDefault = `https://ui-avatars.com/api/?name=${user.nome}&background=f8fafc&color=2EA7C9`;
+        document.getElementById('userAvatar').src = user.foto || avatarDefault;
+
+        // Botão de editar nome
+        document.querySelector('.btn-edit-name').addEventListener('click', () => {
+            document.getElementById('novoNomeInput').value = user.nome;
+            modalNomeInstance.show();
+        });
+
+        // Botão de salvar nome
+        document.getElementById('salvarNomeBtn').addEventListener('click', async () => {
+            const novoNome = document.getElementById('novoNomeInput').value.trim();
+            if (!novoNome) return alert("O nome não pode estar vazio.");
+
+            try {
+                const res = await fetch("http://localhost:3000/update-name", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: user.id, nome: novoNome })
+                });
+
+                if (res.ok) {
+                    document.getElementById('userName').innerText = novoNome;
+                    user.nome = novoNome;
+                    localStorage.setItem('usuario', JSON.stringify(user));
+
+                    if (!user.foto) {
+                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${novoNome}&background=f8fafc&color=2EA7C9`;
+                    }
+
+                    modalNomeInstance.hide();
+                } else {
+                    const erro = await res.json();
+                    alert(erro.erro || "Erro ao salvar o nome no servidor.");
+                }
+            } catch (erro) {
+                alert("Erro de conexão com o servidor.");
+            }
+        });
+    });
+
+    // Upload de foto
+async function uploadFoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("foto", file);
+
+    try {
+        // Passar user_id na query string
+        const res = await fetch(`http://localhost:3000/upload-foto?user_id=${user.id}`, {
+            method: "POST",
+            body: formData
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('userAvatar').src = data.url;
+            user.foto = data.url;
+            localStorage.setItem('usuario', JSON.stringify(user));
+        } else {
+            alert("Erro ao salvar a foto no servidor.");
+        }
+    } catch (err) {
+        alert("Erro de comunicação com o servidor.");
+    }
+}
+
+let modalCuidadosInstance;
+    
+    // Coloque essa inicialização dentro do seu document.addEventListener("DOMContentLoaded", () => { ...
+    modalCuidadosInstance = new bootstrap.Modal(document.getElementById('modalCuidados'));
+
+    // Função solta no script
+    async function abrirModalCuidados() {
+      try {
+        const res = await fetch(`http://localhost:3000/cuidados-pendentes/${user.id}`);
+        const pendentes = await res.json();
+        const container = document.getElementById('listaCuidadosPendentes');
+        
+        if (pendentes.length === 0) {
+          container.innerHTML = "<p class='text-center text-muted py-3'>Nenhum cuidado passado pendente de confirmação.</p>";
+       } else {
+          container.innerHTML = pendentes.map(c => `
+            <div class="d-flex justify-content-between align-items-center p-3 mb-2 rounded border" style="background: #f8fafc;">
+              <div>
+                <strong>${c.cuidadora}</strong><br>
+                <span class="text-muted" style="font-size: 12px;">${c.data.split('T')[0].split('-').reverse().join('/')} - ${c.periodo}</span>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-danger fw-bold" onclick="negarCuidado(${c.id})">Não recebi</button>
+                <button class="btn btn-sm text-white fw-bold" style="background: var(--azul);" onclick="confirmarCuidado(${c.id})">Confirmar</button>
+              </div>
+            </div>
+          `).join('');
+        }
+        modalCuidadosInstance.show();
+      } catch (err) {
+        alert("Erro ao buscar cuidados pendentes.");
+      }
+    }
+
+    async function confirmarCuidado(agendamento_id) {
+      if(!confirm("Confirma que recebeu o cuidado? A cuidadora receberá 4 horas.")) return;
+      
+      try {
+        const res = await fetch("http://localhost:3000/confirmar-cuidado", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agendamento_id })
+        });
+        
+        if (res.ok) {
+          alert("Cuidado confirmado! Horas transferidas com sucesso 💙");
+          
+          // Atualiza as horas na tela localmente para dar um feedback visual rápido (subtrai 4 horas)
+          user.horas = (user.horas || 0) - 4;
+          localStorage.setItem('usuario', JSON.stringify(user));
+          document.getElementById('userHoras').innerText = user.horas;
+          document.getElementById('cardHorasNumber').innerText = user.horas;
+          
+          abrirModalCuidados(); // Recarrega a lista
+        } else {
+          const dados = await res.json();
+          alert(dados.erro);
+        }
+      } catch (err) {
+        alert("Erro ao conectar com o servidor.");
+      }
+    }
+
+    async function negarCuidado(agendamento_id) {
+      if(!confirm("Tem certeza que NÃO recebeu o cuidado? O compromisso será fechado e nenhuma hora será transferida para a cuidadora.")) return;
+      
+      try {
+        const res = await fetch("http://localhost:3000/negar-cuidado", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agendamento_id })
+        });
+        
+        if (res.ok) {
+          alert("Informação registrada. O compromisso foi fechado sem transferência de horas.");
+          abrirModalCuidados(); // Recarrega a lista do modal para sumir com o card
+        } else {
+          const dados = await res.json();
+          alert(dados.erro);
+        }
+      } catch (err) {
+        alert("Erro ao conectar com o servidor.");
+      }
+    }
+
+    // Puxa mensagens não lidas
+        async function carregarBadgeChat() {
+            try {
+                const res = await fetch(`http://localhost:3000/mensagens-nao-lidas/${user.id}`);
+                if (res.ok) {
+                    const dados = await res.json();
+                    const badge = document.getElementById('badgeChat');
+                    if (dados.nao_lidas > 0) {
+                        badge.innerText = dados.nao_lidas;
+                        badge.classList.remove('d-none');
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                }
+            } catch (err) { console.error(err); }
+        }
+        carregarBadgeChat(); // Chama assim que a página abre
+  </script>
+
+<script>
+    // 1. Pede permissão ao navegador na primeira vez que o usuário entra
+    if (Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+
+    // 2. Cria um "espião" que vai no servidor a cada 10 segundos
+    setInterval(async () => {
+        // Só tenta avisar se o usuário deu permissão e se estiver logado
+        if (Notification.permission !== "granted") return;
+        
+        const userGlobal = JSON.parse(localStorage.getItem('usuario'));
+        if (!userGlobal) return;
+
+        try {
+            // --- VERIFICA MENSAGENS NO CHAT ---
+            const resMsg = await fetch(`http://localhost:3000/mensagens-nao-lidas/${userGlobal.id}`);
+            const dadosMsg = await resMsg.json();
+            const qtdMsg = dadosMsg.nao_lidas;
+            
+            // Pega a última contagem (se for a primeira vez, anota o valor atual para não apitar logo de cara)
+            const ultimaQtdMsg = parseInt(localStorage.getItem('ultimaQtdMsg')) ?? qtdMsg;
+            
+            if (qtdMsg > ultimaQtdMsg) {
+                new Notification("Nova Mensagem 💬", {
+                    body: "Você tem mensagens novas no Círculo de Cuidado!"
+                });
+            }
+            localStorage.setItem('ultimaQtdMsg', qtdMsg);
+
+            // --- VERIFICA PEDIDOS RECEBIDOS ---
+            const resNotif = await fetch(`http://localhost:3000/notificacoes/${userGlobal.id}`);
+            const dadosNotif = await resNotif.json();
+            const qtdNotif = dadosNotif.length;
+
+            const ultimaQtdNotif = parseInt(localStorage.getItem('ultimaQtdNotif')) ?? qtdNotif;
+            
+            if (qtdNotif > ultimaQtdNotif) {
+                new Notification("Novo Pedido no Círculo 🔔", {
+                    body: "Uma mãe precisa de ajuda ou se ofereceu para cuidar!"
+                });
+            }
+            localStorage.setItem('ultimaQtdNotif', qtdNotif);
+
+        } catch(e) { 
+            console.error("Erro ao verificar alertas em segundo plano", e); 
+        }
+    }, 10000); // Roda a cada 10.000 milissegundos (10 segundos)
+</script>
+</body>
+</html>
