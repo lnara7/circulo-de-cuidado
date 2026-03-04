@@ -16,7 +16,7 @@ app.use("/uploads", express.static("uploads"));
 // CONFIGURAÇÃO POSTGRESQL (NUVEM)
 // ==========================
 const pool = new Pool({
-  connectionString: "postgresql://postgres.mesuwyojkbjwziqrbour:P%40risLond0n123fr@aws-1-us-east-1.pooler.supabase.com:6543/postgres",
+  connectionString: "postgresql://postgres.mesuwyojkbjwziqrbour:H4DPoNOfIUnzs7bF@aws-1-us-east-1.pooler.supabase.com:6543/postgres",
   ssl: {
     rejectUnauthorized: false
   }
