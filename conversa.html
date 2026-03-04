@@ -109,7 +109,9 @@ async function carregarMensagens() {
               if (msg.tipo === 'proposta') {
                   chatBox.innerHTML += `<div class="msg-balao msg-proposta shadow-sm my-2">${msg.conteudo}</div>`;
               } else if (msg.tipo === 'audio') {
-                  chatBox.innerHTML += `<div class="msg-balao ${ehMinha ? 'msg-minha' : 'msg-dela'} shadow-sm d-flex align-items-center"><audio controls src="${msg.conteudo}"></audio></div>`;
+                  chatBox.innerHTML += `<div class="msg-balao ${ehMinha ? 'msg-minha' : 'msg-dela'} shadow-sm d-flex align-items-center">
+                                        <audio controls preload="metadata" playsinline src="${msg.conteudo}"></audio>
+                                        </div>`;
               } else if (msg.tipo === 'imagem') {
                   // AQUI ESTÁ O PASSO 3: Lógica para mostrar a imagem na tela
                   chatBox.innerHTML += `

@@ -6,8 +6,20 @@ const multer = require("multer");
 const path = require("path");
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization", "Range"],
+  exposedHeaders: ["Content-Range", "Accept-Ranges", "Content-Length"]
+}));
 app.use(express.json());
+
+const fs = require("fs");
+if (!fs.existsSync("uploads")) {
+    fs.mkdirSync("uploads");
+    console.log("📁 Pasta 'uploads' criada com sucesso.");
+}
 
 // Permitir acesso às fotos
 app.use("/uploads", express.static("uploads"));
