@@ -132,7 +132,7 @@
                 localStorage.setItem('usuario', JSON.stringify(user));
 
                 // Envia para o backend
-                await fetch("http://localhost:3000/avatar", {
+                await fetch("https://circulo-de-cuidado-api.onrender.com/avatar", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ user_id: user.id, foto: base64Foto })
@@ -142,7 +142,7 @@
         }
 
         async function carregar() {
-            const res = await fetch("http://localhost:3000/events");
+            const res = await fetch("https://circulo-de-cuidado-api.onrender.com/events");
             eventos = await res.json();
             render();
         }
@@ -242,7 +242,7 @@
         }
 
         async function salvarEvento() {
-            const res = await fetch("http://localhost:3000/events", {
+            const res = await fetch("https://circulo-de-cuidado-api.onrender.com/events", {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ user_id: user.id, data: selectedDate, tipo: document.getElementById('tipo').value, periodo: document.getElementById('periodo').value })
             });
@@ -256,7 +256,7 @@
 
         async function apagarEvento(id) {
             if(confirm("Remover este agendamento?")) {
-                await fetch(`http://localhost:3000/events/${id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: user.id }) });
+                await fetch(`https://circulo-de-cuidado-api.onrender.com/events/${id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: user.id }) });
                 dayModalInstance.hide(); 
                 carregar();
             }

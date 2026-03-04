@@ -94,7 +94,7 @@
   async function carregarDatas() {
     try {
       // Agora buscamos na rota combinada
-      const res = await fetch(`http://localhost:3000/agenda/${user.id}`);
+      const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/agenda/${user.id}`);
       const datas = await res.json();
 
       // TRAVA DE SEGURANÇA
@@ -157,7 +157,7 @@
     if (!confirm("Tem certeza que deseja cancelar este agendamento?")) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/agendamentos/${id}`, { method: "DELETE" });
+      const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/agendamentos/${id}`, { method: "DELETE" });
       if (res.ok) {
         alert("Agendamento cancelado com sucesso!");
         carregarDatas(); // Recarrega a agenda

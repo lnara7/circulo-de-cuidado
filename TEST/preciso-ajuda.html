@@ -98,7 +98,7 @@ async function pintarCalendario() {
   const month = hoje.getMonth();
 
   // Busca datas disponíveis de todos os usuários
-  const res = await fetch("http://localhost:3000/disponibilidades-geral");
+  const res = await fetch("https://circulo-de-cuidado-api.onrender.com/disponibilidades-geral");
   const disponibilidades = await res.json(); // [{data:"2026-03-05", periodo:"Manhã"}]
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -136,7 +136,7 @@ async function solicitarAjuda() {
   if (!user) { alert("Usuário não encontrado."); return; }
 
   try {
-    const res = await fetch("http://localhost:3000/pedidos", {
+    const res = await fetch("https://circulo-de-cuidado-api.onrender.com/pedidos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ solicitante_id: user.id, data: valor, periodo })
@@ -161,7 +161,7 @@ async function verHistoricoPedidos() {
   if (!user) return;
 
   try {
-    const res = await fetch(`http://localhost:3000/historico-pedidos/${user.id}`);
+    const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/historico-pedidos/${user.id}`);
     const dados = await res.json();
 
     const div = document.getElementById("historicoPedidos");
@@ -185,7 +185,7 @@ async function verHistoricoDisponibilidade() {
   if (!user) return;
 
   try {
-    const res = await fetch(`http://localhost:3000/historico-disponibilidade/${user.id}`);
+    const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/historico-disponibilidade/${user.id}`);
     const dados = await res.json();
 
     const div = document.getElementById("historicoDisponibilidade");
@@ -207,7 +207,7 @@ async function verHistoricoDisponibilidade() {
 async function carregarMãesDisponiveis() {
     const user = JSON.parse(localStorage.getItem("usuario"));
     try {
-      const res = await fetch(`http://localhost:3000/disponibilidades-abertas/${user.id}`);
+      const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/disponibilidades-abertas/${user.id}`);
       const disponibilidades = await res.json();
       const container = document.getElementById("listaDisponiveis");
       
@@ -242,7 +242,7 @@ async function carregarMãesDisponiveis() {
   window.pedirAjudaMãe = async function(destinatario_id, data, periodo) {
     const user = JSON.parse(localStorage.getItem("usuario"));
     try {
-      const res = await fetch("http://localhost:3000/enviar-notificacao", {
+      const res = await fetch("https://circulo-de-cuidado-api.onrender.com/enviar-notificacao", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ remetente_id: user.id, destinatario_id, tipo: 'pede_ajuda', data, periodo })
       });

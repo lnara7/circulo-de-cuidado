@@ -99,7 +99,7 @@
             e.preventDefault();
             const cpfLimpo = document.getElementById("cpfLogin").value.replace(/\D/g, "");
 
-            const res = await fetch("http://localhost:3000/login", {
+            const res = await fetch("https://circulo-de-cuidado-api.onrender.com/login", {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ cpf: cpfLimpo, senha: document.getElementById("senha").value })
             });
@@ -117,7 +117,7 @@
             e.preventDefault();
             const cpfLimpo = document.getElementById("resetCpf").value.replace(/\D/g, "");
 
-            const res = await fetch("http://localhost:3000/reset-password", {
+            const res = await fetch("https://circulo-de-cuidado-api.onrender.com/reset-password", {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     cpf: cpfLimpo, 

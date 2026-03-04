@@ -94,7 +94,7 @@
 
 async function carregarMensagens() {
       try {
-          const res = await fetch(`http://localhost:3000/mensagens/${user.id}/${contato_id}`);
+          const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/mensagens/${user.id}/${contato_id}`);
           const mensagens = await res.json();
           
           // Impede que a tela recarregue se não houver mensagem nova (ajuda o áudio a não cortar!)
@@ -130,7 +130,7 @@ async function carregarMensagens() {
       if (!texto) return;
 
       input.value = "";
-      await fetch("http://localhost:3000/mensagens", {
+      await fetch("https://circulo-de-cuidado-api.onrender.com/mensagens", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ remetente_id: user.id, destinatario_id: contato_id, conteudo: texto, tipo: 'texto' })
       });
@@ -158,12 +158,12 @@ async function carregarMensagens() {
                   formData.append("audio", audioBlob, `audio_${Date.now()}.webm`);
 
                   // Faz upload do áudio
-                  const res = await fetch("http://localhost:3000/upload-audio", { method: "POST", body: formData });
+                  const res = await fetch("https://circulo-de-cuidado-api.onrender.com/upload-audio", { method: "POST", body: formData });
                   const dados = await res.json();
 
                   // Envia a URL do áudio como mensagem
                   if (res.ok) {
-                      await fetch("http://localhost:3000/mensagens", {
+                      await fetch("https://circulo-de-cuidado-api.onrender.com/mensagens", {
                           method: "POST", headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ remetente_id: user.id, destinatario_id: contato_id, conteudo: dados.url, tipo: 'audio' })
                       });
@@ -191,7 +191,7 @@ async function carregarMensagens() {
 
       try {
           // 1. Envia a notificação real para a aba de pedidos
-          const res = await fetch("http://localhost:3000/enviar-notificacao", {
+          const res = await fetch("https://circulo-de-cuidado-api.onrender.com/enviar-notificacao", {
               method: "POST", headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ remetente_id: user.id, destinatario_id: contato_id, tipo, data, periodo })
           });
@@ -202,7 +202,7 @@ async function carregarMensagens() {
                 : `🧡 Pedi sua ajuda para cuidar no dia ${data.split('-').reverse().join('/')} (${periodo}). Olhe seus "Pedidos Recebidos"!`;
 
               // 2. Coloca um aviso visual no chat
-              await fetch("http://localhost:3000/mensagens", {
+              await fetch("https://circulo-de-cuidado-api.onrender.com/mensagens", {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ remetente_id: user.id, destinatario_id: contato_id, conteudo: textoExibicao, tipo: 'proposta' })
               });
@@ -228,7 +228,7 @@ async function carregarMensagens() {
 
       try {
           // 1. Envia a imagem para a pasta uploads/ do servidor
-          const res = await fetch("http://localhost:3000/upload-imagem", {
+          const res = await fetch("https://circulo-de-cuidado-api.onrender.com/upload-imagem", {
               method: "POST",
               body: formData
           });
@@ -236,7 +236,7 @@ async function carregarMensagens() {
 
           if (res.ok) {
               // 2. Grava a mensagem no banco de dados com o link da imagem
-              await fetch("http://localhost:3000/mensagens", {
+              await fetch("https://circulo-de-cuidado-api.onrender.com/mensagens", {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ 
                       remetente_id: user.id, 

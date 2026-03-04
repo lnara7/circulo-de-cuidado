@@ -210,7 +210,7 @@ app.post("/upload-foto", upload.single("foto"), async (req, res) => {
     if (!user_id || !req.file) return res.status(400).json({ erro: "Dados inválidos." });
 
     // Cria URL da foto
-    const fotoUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    const fotoUrl = `https://circulo-de-cuidado-api.onrender.com/uploads/${req.file.filename}`;
 
     // Salva no banco
     await pool.query("UPDATE users SET foto = $1 WHERE id = $2", [fotoUrl, user_id]);
@@ -801,7 +801,7 @@ app.post("/mensagens", async (req, res) => {
 app.post("/upload-audio", upload.single("audio"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ erro: "Nenhum áudio enviado." });
-    const audioUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    const audioUrl = `https://circulo-de-cuidado-api.onrender.com/uploads/${req.file.filename}`;
     res.json({ url: audioUrl });
   } catch (err) {
     res.status(500).json({ erro: "Erro ao salvar áudio." });
@@ -816,7 +816,7 @@ app.post("/upload-imagem", upload.single("imagem"), async (req, res) => {
     if (!req.file) return res.status(400).json({ erro: "Nenhuma imagem enviada." });
     
     // Cria a URL da imagem baseada na pasta uploads
-    const imgUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    const imgUrl = `https://circulo-de-cuidado-api.onrender.com/uploads/${req.file.filename}`;
     res.json({ url: imgUrl });
   } catch (err) {
     res.status(500).json({ erro: "Erro ao salvar imagem." });
@@ -832,5 +832,5 @@ app.use((req, res) => {
 
 
 app.listen(3000, () => {
-  console.log("🚀 Servidor rodando em http://localhost:3000");
+  console.log("🚀 Servidor rodando em https://circulo-de-cuidado-api.onrender.com");
 });

@@ -47,7 +47,7 @@
 
   async function carregarChats() {
     try {
-      const res = await fetch(`http://localhost:3000/chats/${user.id}`);
+      const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/chats/${user.id}`);
       todosChats = await res.json();
       renderizarChats();
     } catch (err) { console.error(err); }
@@ -103,7 +103,7 @@ function renderizarChats() {
 
   async function favoritar(contato_id, favoritarStatus) {
       try {
-          await fetch("http://localhost:3000/favoritar", {
+          await fetch("https://circulo-de-cuidado-api.onrender.com/favoritar", {
               method: "POST", headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ user_id: user.id, contato_id, favoritar: favoritarStatus })
           });

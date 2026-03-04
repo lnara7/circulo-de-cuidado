@@ -34,7 +34,7 @@
 
   async function carregarNotificacoes() {
     try {
-      const res = await fetch(`http://localhost:3000/notificacoes/${user.id}`);
+      const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/notificacoes/${user.id}`);
       const notificacoes = await res.json();
       const container = document.getElementById("listaNotificacoes");
       container.innerHTML = "";
@@ -81,7 +81,7 @@
       if (!confirm(`Deseja realmente ${resposta === 'aceito' ? 'aceitar' : 'recusar'} este pedido?`)) return;
       
       try {
-          const res = await fetch("http://localhost:3000/responder-notificacao", {
+          const res = await fetch("https://circulo-de-cuidado-api.onrender.com/responder-notificacao", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ notificacao_id, resposta })

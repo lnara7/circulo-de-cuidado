@@ -95,7 +95,7 @@
     if (!user) { alert("Usuário não encontrado."); return; }
 
     try {
-      const res = await fetch("http://localhost:3000/disponibilidade", {
+      const res = await fetch("https://circulo-de-cuidado-api.onrender.com/disponibilidade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: user.id, data: valor, periodo })
@@ -121,7 +121,7 @@
     if (!user) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/historico-disponibilidade/${user.id}`);
+      const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/historico-disponibilidade/${user.id}`);
       const dados = await res.json();
 
       const div = document.getElementById("historicoDisponibilidade");
@@ -144,7 +144,7 @@
   async function carregarMãesPrecisando() {
     const user = JSON.parse(localStorage.getItem("usuario"));
     try {
-      const res = await fetch(`http://localhost:3000/pedidos-abertos/${user.id}`);
+      const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/pedidos-abertos/${user.id}`);
       const pedidos = await res.json();
       const container = document.getElementById("listaPedidosAbertos");
       
@@ -179,7 +179,7 @@
   window.aceitarPedido = async function(destinatario_id, data, periodo) {
     const user = JSON.parse(localStorage.getItem("usuario"));
     try {
-      const res = await fetch("http://localhost:3000/enviar-notificacao", {
+      const res = await fetch("https://circulo-de-cuidado-api.onrender.com/enviar-notificacao", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ remetente_id: user.id, destinatario_id, tipo: 'oferece_ajuda', data, periodo })
       });

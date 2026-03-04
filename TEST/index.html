@@ -282,7 +282,7 @@
         // Puxa as notificações pendentes para colocar no Badge
         async function carregarBadgeNotificacoes() {
             try {
-                const res = await fetch(`http://localhost:3000/notificacoes/${user.id}`);
+                const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/notificacoes/${user.id}`);
                 const notificacoes = await res.json();
                 const badge = document.getElementById('badgeNotificacoes');
                 if (notificacoes.length > 0) {
@@ -309,7 +309,7 @@
         // Busca os dados mais recentes do banco de dados e atualiza a tela
         async function carregarEstatisticasFrescas() {
             try {
-                const res = await fetch(`http://localhost:3000/usuario/${user.id}`);
+                const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/usuario/${user.id}`);
                 if (res.ok) {
                     const dados = await res.json();
                     
@@ -345,7 +345,7 @@
             if (!novoNome) return alert("O nome não pode estar vazio.");
 
             try {
-                const res = await fetch("http://localhost:3000/update-name", {
+                const res = await fetch("https://circulo-de-cuidado-api.onrender.com/update-name", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ user_id: user.id, nome: novoNome })
@@ -381,7 +381,7 @@ async function uploadFoto(event) {
 
     try {
         // Passar user_id na query string
-        const res = await fetch(`http://localhost:3000/upload-foto?user_id=${user.id}`, {
+        const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/upload-foto?user_id=${user.id}`, {
             method: "POST",
             body: formData
         });
@@ -407,7 +407,7 @@ let modalCuidadosInstance;
     // Função solta no script
     async function abrirModalCuidados() {
       try {
-        const res = await fetch(`http://localhost:3000/cuidados-pendentes/${user.id}`);
+        const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/cuidados-pendentes/${user.id}`);
         const pendentes = await res.json();
         const container = document.getElementById('listaCuidadosPendentes');
         
@@ -437,7 +437,7 @@ let modalCuidadosInstance;
       if(!confirm("Confirma que recebeu o cuidado? A cuidadora receberá 4 horas.")) return;
       
       try {
-        const res = await fetch("http://localhost:3000/confirmar-cuidado", {
+        const res = await fetch("https://circulo-de-cuidado-api.onrender.com/confirmar-cuidado", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ agendamento_id })
@@ -466,7 +466,7 @@ let modalCuidadosInstance;
       if(!confirm("Tem certeza que NÃO recebeu o cuidado? O compromisso será fechado e nenhuma hora será transferida para a cuidadora.")) return;
       
       try {
-        const res = await fetch("http://localhost:3000/negar-cuidado", {
+        const res = await fetch("https://circulo-de-cuidado-api.onrender.com/negar-cuidado", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ agendamento_id })
@@ -487,7 +487,7 @@ let modalCuidadosInstance;
     // Puxa mensagens não lidas
         async function carregarBadgeChat() {
             try {
-                const res = await fetch(`http://localhost:3000/mensagens-nao-lidas/${user.id}`);
+                const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/mensagens-nao-lidas/${user.id}`);
                 if (res.ok) {
                     const dados = await res.json();
                     const badge = document.getElementById('badgeChat');
@@ -519,7 +519,7 @@ let modalCuidadosInstance;
 
         try {
             // --- VERIFICA MENSAGENS NO CHAT ---
-            const resMsg = await fetch(`http://localhost:3000/mensagens-nao-lidas/${userGlobal.id}`);
+            const resMsg = await fetch(`https://circulo-de-cuidado-api.onrender.com/mensagens-nao-lidas/${userGlobal.id}`);
             const dadosMsg = await resMsg.json();
             const qtdMsg = dadosMsg.nao_lidas;
             
@@ -534,7 +534,7 @@ let modalCuidadosInstance;
             localStorage.setItem('ultimaQtdMsg', qtdMsg);
 
             // --- VERIFICA PEDIDOS RECEBIDOS ---
-            const resNotif = await fetch(`http://localhost:3000/notificacoes/${userGlobal.id}`);
+            const resNotif = await fetch(`https://circulo-de-cuidado-api.onrender.com/notificacoes/${userGlobal.id}`);
             const dadosNotif = await resNotif.json();
             const qtdNotif = dadosNotif.length;
 

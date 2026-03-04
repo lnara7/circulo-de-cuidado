@@ -93,7 +93,7 @@
             const nasc = new Date(dataNascDigitada);
             if (nasc >= hoje) return alert("Data de nascimento inválida.");
 
-            const res = await fetch("http://localhost:3000/register", {
+            const res = await fetch("https://circulo-de-cuidado-api.onrender.com/register", {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     nome: document.getElementById("nome").value, 

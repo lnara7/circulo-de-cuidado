@@ -37,7 +37,7 @@
     const nome = document.getElementById("inputBusca").value;
     
     try {
-      const res = await fetch(`http://localhost:3000/buscar-maes/${user.id}?nome=${nome}`);
+      const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/buscar-maes/${user.id}?nome=${nome}`);
       const maes = await res.json();
       const container = document.getElementById("listaMaes");
       container.innerHTML = "";
