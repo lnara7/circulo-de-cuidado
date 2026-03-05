@@ -7,6 +7,14 @@ const path = require("path");
 
 const app = express();
 
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({ 
+  cloud_name: 'dedpxsuwp', 
+  api_key: '521713444496792', 
+  api_secret: '9Rx6K_GYeQOwdEIGZiPgvnYe_ew' 
+});
+
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
@@ -217,19 +225,16 @@ app.post("/update-name", async (req, res) => {
 //===========================
 app.post("/upload-foto", upload.single("foto"), async (req, res) => {
   try {
-    const user_id = req.body.user_id || req.query.user_id; // pegar do body ou da query
-    if (!user_id || !req.file) return res.status(400).json({ erro: "Dados inválidos." });
+    const user_id = req.body.user_id || req.query.user_id;
+    if (!req.file) return res.status(400).json({ erro: "Arquivo não enviado." });
 
-    // Cria URL da foto
-    const fotoUrl = `https://circulo-de-cuidado-api.onrender.com/uploads/${req.file.filename}`;
+    const resultado = await cloudinary.uploader.upload(req.file.path, { folder: "perfil" });
+    const fotoUrl = resultado.secure_url;
 
-    // Salva no banco
     await pool.query("UPDATE users SET foto = $1 WHERE id = $2", [fotoUrl, user_id]);
     res.json({ url: fotoUrl });
-
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ erro: "Erro ao salvar foto." });
+    res.status(500).json({ erro: "Erro no Cloudinary." });
   }
 });
 
@@ -811,9 +816,14 @@ app.post("/mensagens", async (req, res) => {
 // ==========================
 app.post("/upload-audio", upload.single("audio"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ erro: "Nenhum áudio enviado." });
-    const audioUrl = `https://circulo-de-cuidado-api.onrender.com/uploads/${req.file.filename}`;
-    res.json({ url: audioUrl });
+    if (!req.file) return res.status(400).json({ erro: "Áudio não enviado." });
+
+    const resultado = await cloudinary.uploader.upload(req.file.path, { 
+      resource_type: "video", // Cloudinary trata áudio como 'video'
+      folder: "audios" 
+    });
+    
+    res.json({ url: resultado.secure_url });
   } catch (err) {
     res.status(500).json({ erro: "Erro ao salvar áudio." });
   }
@@ -824,11 +834,10 @@ app.post("/upload-audio", upload.single("audio"), async (req, res) => {
 // ==========================
 app.post("/upload-imagem", upload.single("imagem"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ erro: "Nenhuma imagem enviada." });
-    
-    // Cria a URL da imagem baseada na pasta uploads
-    const imgUrl = `https://circulo-de-cuidado-api.onrender.com/uploads/${req.file.filename}`;
-    res.json({ url: imgUrl });
+    if (!req.file) return res.status(400).json({ erro: "Imagem não enviada." });
+
+    const resultado = await cloudinary.uploader.upload(req.file.path, { folder: "chat_imagens" });
+    res.json({ url: resultado.secure_url });
   } catch (err) {
     res.status(500).json({ erro: "Erro ao salvar imagem." });
   }
