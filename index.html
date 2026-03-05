@@ -159,7 +159,14 @@
         </a>
       </div>
       <div class="col text-center" style="cursor: pointer;" onclick="abrirModalCuidados()">
-        <img src="./icons/check.png" class="img-fluid icone_2" alt="Recebeu o cuidado">
+        <div class="position-relative d-inline-block">
+            <img src="./icons/check.png" class="img-fluid icone_2" alt="Recebeu o cuidado">
+            <span id="badgeCuidadosPendentes" 
+              class="position-absolute top-0 start-75 translate-middle badge rounded-pill bg-danger d-none" 
+              style="font-size: 4rem; padding: 10px 10px; border: 2px solid white;">
+              0
+            </span>
+        </div>
         <p class="titulo_3 fw-bold mb-0 mt-2">Recebeu o cuidado?</p>
       </div>
       <div class="col text-center">
@@ -551,6 +558,24 @@ let modalCuidadosInstance;
             console.error("Erro ao verificar alertas em segundo plano", e); 
         }
     }, 10000); // Roda a cada 10.000 milissegundos (10 segundos)
+    async function carregarBadgeCuidados() {
+        try {
+            const res = await fetch(`https://circulo-de-cuidado-api.onrender.com/contador-cuidados-pendentes/${user.id}`);
+            if (res.ok) {
+                const dados = await res.json();
+                const badge = document.getElementById('badgeCuidadosPendentes');
+                if (dados.pendentes > 0) {
+                    badge.innerText = dados.pendentes;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
+                }
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    // Chame a função dentro do seu document.addEventListener("DOMContentLoaded", ...)
+    carregarBadgeCuidados();
 </script>
 </body>
 </html>

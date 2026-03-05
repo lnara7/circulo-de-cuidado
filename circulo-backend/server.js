@@ -844,6 +844,23 @@ app.post("/upload-imagem", upload.single("imagem"), async (req, res) => {
 });
 
 // ==========================
+// CONTADOR DE CUIDADOS PENDENTES
+// ==========================
+app.get("/contador-cuidados-pendentes/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+  try {
+    const result = await pool.query(`
+      SELECT count(*) 
+      FROM agendamentos 
+      WHERE mae_cuidada_id = $1 AND status = 'agendado' AND data <= CURRENT_DATE
+    `, [user_id]);
+    res.json({ pendentes: parseInt(result.rows[0].count) });
+  } catch (err) {
+    res.status(500).json({ erro: "Erro ao contar cuidados." });
+  }
+});
+
+// ==========================
 // TRATAMENTO 404
 // ==========================
 app.use((req, res) => {
